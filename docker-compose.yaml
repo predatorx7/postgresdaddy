@@ -1,0 +1,34 @@
+version: "3"
+services:
+  demo_db_service:
+    image: postgres:15-bookworm
+    ports:
+      - "5432:5432"
+    container_name: demo_db_container
+    command: -c 'config_file=/etc/postgresql/postgresql.conf'
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+      # This is right now default, added to help with config in future
+      - ./dba-postgres.conf:/etc/postgresql/postgresql.conf 
+    cap_add:
+      - SYS_NICE
+    restart: always
+    env_file: .env
+    networks:
+      - demo_db_service_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+networks:
+  demo_db_service_network:
+    driver: bridge
+    name: demo_db_service_network
+    external: false
+
+volumes:
+  db_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./db_data
+      o: bind
